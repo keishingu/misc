@@ -8,9 +8,9 @@ require "twitter"
 json_fitbit = open('fitbit.json') do |io|
   JSON.load(io)
 end
-client_id = '22B2R9'
-client_secret = '865c8c34548d663cb6fea96add42f69a'
-redirect_uri = 'https://dl.dropboxusercontent.com/u/30383510/index.html'
+client_id     = json_fitbit["client_id"]
+client_secret = json_fitbit["client_secret"]
+redirect_uri  = json_fitbit["redirect_uri"]
 
 client = OAuth2::Client.new(client_id, client_secret, site: 'https://api.fitbit.com', authorize_url: 'https://www.fitbit.com/oauth2/authorize', token_url: 'https://api.fitbit.com/oauth2/token')
 authurl = client.auth_code.authorize_url(redirect_uri: redirect_uri, scope: 'heartrate')
