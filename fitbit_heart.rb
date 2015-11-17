@@ -23,7 +23,6 @@ bearer_token = "#{client_id}:#{client_secret}"
 encoded_bearer_token = Base64.strict_encode64(bearer_token)
 
 access_token = client.auth_code.get_token(code, grant_type: 'authorization_code', client_id: client_id, redirect_uri: redirect_uri, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
-p access_token
 
 #twitter
 json_twitter = open('twitter.json') do |io|
@@ -39,14 +38,7 @@ end
 #/twitter
 
 while true do
-	begin
-		res = access_token.get('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json').body
-	rescue => ex
-		access_token = client.auth_code.get_token(grant_type: 'refresh_token', refresh_token: access_token.refresh_token, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
-		res = access_token.get('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json').body
-	ensure
-		hearts = JSON.parse(res)
-	end
+	hearts = JSON.parse(access_token.get('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json').body)
 	heart = hearts["activities-heart-intraday"]["dataset"].last()
 	p heart
 	if heart == nil then
@@ -60,5 +52,6 @@ while true do
 		twitter.update("ただいま緊張しております！心拍数#{heart_v} (#{heart_t})")
 	end
 
+  access_token = access_token.refresh!(grant_type: 'refresh_token', refresh_token: access_token.refresh_token, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
 	sleep 300
 end
