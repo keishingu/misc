@@ -37,9 +37,15 @@ twitter = Twitter::REST::Client.new do |config|
 end
 #/twitter
 
-count = 0   # 一時間近く経ったらアクセストークンをリフレッシュする
 while true do
-	hearts = JSON.parse(access_token.get('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json').body)
+	
+	begin
+		hearts = JSON.parse(access_token.get('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json').body)
+	rescue OAuth2::Error    # 502エラーだったらリトライ
+		sleep 60
+		hearts = JSON.parse(access_token.get('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json').body)
+	end
+
 	heart = hearts["activities-heart-intraday"]["dataset"].last()
 	p heart
 	if heart == nil then
@@ -55,9 +61,12 @@ while true do
 
 	sleep 300
 	
-	count += 1
-	if count > 10 then
+	# アクセストークンを更新
+	begin
 		access_token = access_token.refresh!(grant_type: 'refresh_token', refresh_token: access_token.refresh_token, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
-		count = 0
-	end
+	rescue OAuth2::Error
+		sleep 60
+		access_token = access_token.refresh!(grant_type: 'refresh_token', refresh_token: access_token.refresh_token, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
+	end	
+	
 end
