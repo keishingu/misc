@@ -50,6 +50,13 @@ while true do
 	p heart
 	if heart == nil then
 		sleep 300
+		# アクセストークンを更新
+		begin
+			access_token = access_token.refresh!(grant_type: 'refresh_token', refresh_token: access_token.refresh_token, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
+		rescue OAuth2::Error
+			sleep 60
+			access_token = access_token.refresh!(grant_type: 'refresh_token', refresh_token: access_token.refresh_token, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
+		end	
 		next
 	end
 	heart_t = heart["time"]
