@@ -56,7 +56,7 @@ while true do
 	heart_v = heart["value"]
 
 	if heart_v > 90 then
-		twitter.update("ただいま緊張しております！心拍数#{heart_v} (#{heart_t})")
+		twitter.update("♥ただいま緊張しております！心拍数#{heart_v} (#{heart_t})")
 	end
 
 	sleep 300
