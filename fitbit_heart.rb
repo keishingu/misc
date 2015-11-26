@@ -72,6 +72,11 @@ while true do
 	begin
 		access_token = access_token.refresh!(grant_type: 'refresh_token', refresh_token: access_token.refresh_token, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
 	rescue OAuth2::Error
+		p "OAuth2::Error"
+		sleep 60
+		access_token = access_token.refresh!(grant_type: 'refresh_token', refresh_token: access_token.refresh_token, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
+	rescue Faraday::ConnectionFailed
+		p "Faraday::ConnectionFailed"
 		sleep 60
 		access_token = access_token.refresh!(grant_type: 'refresh_token', refresh_token: access_token.refresh_token, :headers => {'Authorization' => "Basic #{encoded_bearer_token}"})
 	end	
