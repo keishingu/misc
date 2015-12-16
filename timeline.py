@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from requests_oauthlib import OAuth1Session
-from datetime import datetime
+from datetime import datetime, timedelta, tzinfo
 import json
 import re
 
@@ -40,12 +40,14 @@ if req.status_code == 200:
     # レスポンスはJSON形式なので parse する
     timeline = json.loads(req.text)
     # 各ツイートの本文を表示
+    now = datetime.now(tz=JST()).replace(tzinfo=None)
+    print "now:" + str(now)
     for tweet in timeline:
         # print(json.dumps(tweet, indent=4))
-        now = datetime.now(tz=JST())
         t   = datetime.strptime(tweet["created_at"], "%a %b %d %H:%M:%S +0000 %Y")
-        print (now - t).minutes
-        if (now - t).minutes < 5:
+        print "t:" + str(t)
+        print (now - t).seconds
+        if (now - t).seconds < 300:
             time        = datetime.strptime(tweet["created_at"], "%a %b %d %H:%M:%S +0000 %Y").strftime('%Y/%m/%d %H:%M:%S')
             time_html   = time + "<br />"
             text_html   = re.sub(r'((http|https)://[A-Za-z0-9.-_]*)', '', tweet["text"]).replace("\n", "<br />")
