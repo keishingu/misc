@@ -25,29 +25,44 @@ params = { "count" : "50" }
 twitter = OAuth1Session(CK, CS, AT, AS)
 req = twitter.get(url, params = params)
 
+# タイムゾーン設定
+class JST(tzinfo):
+    def utcoffset(self, dt):
+        return timedelta(hours=9)
+
+    def dst(self, dt):
+        return timedelta(0)
+
+    def tzname(self, dt):
+        return 'JST'
+
 if req.status_code == 200:
     # レスポンスはJSON形式なので parse する
     timeline = json.loads(req.text)
     # 各ツイートの本文を表示
     for tweet in timeline:
     	# print(json.dumps(tweet, indent=4))
-    	time        = datetime.strptime(tweet["created_at"], "%a %b %d %H:%M:%S +0000 %Y").strftime('%Y/%m/%d %H:%M:%S')
-    	time_html   = time + "<br />"
-    	text_html   = re.sub(r'((http|https)://[A-Za-z0-9.-_]*)', '', tweet["text"]).replace("\n", "<br />")
-    	source_html = "<br />by " + tweet["source"]
-
-    	if len(tweet["entities"]["urls"]) > 0:
-    		url = tweet["entities"]["urls"][0]["expanded_url"]
-    		url_html = ' <a href="' + url + '">' + url + '</a>'
-    	else:
-    		url_html = ""
-
-    	try:
-    		img_html = "<br><img src=\"" + tweet["entities"]["media"][0]["media_url"] + "\" />"
-    	except:
-    		img_html = ""
-
-        print((time_html + text_html + url_html + source_html + img_html + "<hr />").encode('utf_8'))
+    	now = datetime.now(tz=JST())
+    	t   = datetime.strptime(tweet["created_at"], "%a %b %d %H:%M:%S +0000 %Y")
+    	print (now - t).minutes
+    	if (now - t).minutes < 5:
+            time        = datetime.strptime(tweet["created_at"], "%a %b %d %H:%M:%S +0000 %Y").strftime('%Y/%m/%d %H:%M:%S')
+            time_html   = time + "<br />"
+        	text_html   = re.sub(r'((http|https)://[A-Za-z0-9.-_]*)', '', tweet["text"]).replace("\n", "<br />")
+        	source_html = "<br />by " + tweet["source"]
+    
+        	if len(tweet["entities"]["urls"]) > 0:
+        		url = tweet["entities"]["urls"][0]["expanded_url"]
+        		url_html = ' <a href="' + url + '">' + url + '</a>'
+        	else:
+        		url_html = ""
+    
+        	try:
+        		img_html = "<br><img src=\"" + tweet["entities"]["media"][0]["media_url"] + "\" />"
+        	except:
+        		img_html = ""
+    
+            print((time_html + text_html + url_html + source_html + img_html + "<hr />").encode('utf_8'))
 
 else:
     # エラーの場合
